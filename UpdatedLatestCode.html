@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--Pull in code and data-->
+    <script src='Texas_disaster_data.js'></script>
+    <script type = 'text/javascript' src ='Calculations.js'></script> 
+    
+    <head>
+        <!-- Required meta tags -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Natural Disaster Damage Mapping</title>
+        <style type="text/css">
+
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                height: 100%; 
+                max-height: 100%; 
+                font-family:Sans-serif;
+                line-height: 1.5em;
+                background: #474747;
+            }
+                    
+            #header {
+                /* text-shadow: h-shadow v-shadow blur color;*/
+                position: absolute;
+                top: 0;
+                left: 0;
+                text-align: center;
+                font: Helvetica, Arial, Sans-Serif;
+                color: #999;
+                text-shadow: 0px 8px 8px #2a2a2a;
+                text-transform:uppercase;
+                width: 100%;
+                overflow: hidden; /* Disables scrollbars on the header frame. To enable scrollbars, change "hidden" to "scroll" */
+                background: #474747;
+            }
+
+            #imag {
+                float:right;
+            }
+
+            #imag1 {
+                float:right;
+            }
+
+            #h{
+                /* text-shadow: h-shadow v-shadow blur color;*/
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 20px;
+                text-transform:uppercase;
+                color: #222;
+                text-shadow: 0px 2px 3px #555;
+            }
+
+            p, input, label, select, option {
+                font: Helvetica, Arial, Sans-Serif;
+                color: #555;
+                text-shadow: 0px 0px 0px #171717;
+            } 
+
+
+
+            main {
+            position: fixed;
+            top: 75px; /* Set this to the height of the header */
+            bottom: 140px; /* Set this to the height of the footer */
+            left: 400px; 
+            right: 0;
+            overflow: auto; 
+            background: #474747;
+            }
+
+            #nav {
+                position: absolute; 
+                left: 0;
+                top: 75px;
+                bottom: 0; 
+                width: 400px;
+                overflow: auto;
+                background: #91a3b0; 		
+            }
+
+            #footer {
+                position: fixed;
+                left: 400px;
+                display: inline;
+                bottom: 0;
+                width: 100%;
+                height: 140px; 
+                overflow: auto; 
+                background: #474747;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 20px;
+                text-transform:uppercase;
+                color: #222;
+                text-shadow: 0px 2px 3px #555;
+            }
+                    
+            #logo {
+                padding:10px;
+                border-radius: 30px;
+                width: 95%;
+                gap:5px, 5px;
+            }
+                            
+            .innertube {
+                border-radius: 25px; 
+                margin: 15px; /* Provides padding for the content */
+                display: block;
+                float:left;
+                background:#999;
+            }
+
+            .innertube1 {
+                position:absolute;
+                margin: 15px; /* Provides padding for the content */
+                display: inline-block;
+                width: 50%;
+                height: 100px;
+                gap: 5px, 5px;
+                float:left;
+                
+            }                                
+            /*IE6 fix*/
+            * html body{
+                padding: 75px 0 150px 400px; /* Set the third value to the height of the footer and last value to the width of the nav */
+            }       
+            * html main{ 
+                height: 100%; 
+                width: 100%; 
+            }
+            #button{
+                height:20px; 
+                width:60px; 
+                
+                position:relative;
+                 
+                left:50%;
+                bottom:5px;
+            }
+
+            /*GRID IS GOOD TO GO except for right margin*/ 
+            #outer-grid {
+                display: grid;
+                grid-template-columns: 120px 512px 1fr;
+                grid-template-rows: 84px 428px 182px;
+                grid-gap: 10px;
+            }
+            #outer-grid > div {
+                color: #474747;
+                font-size: 1vw;
+                padding: 10px;
+            }
+            #inner-grid {
+                display: grid;
+                grid-template-columns: 622px 622px;
+                grid-gap: 5px;
+            }
+            #inner-grid > div {
+                background: #999;
+                padding: 10px;
+            }
+           
+        
+            
+        </style>
+    </head>
+
+    <body>      
+        <header id="header">
+			<div id="logo">
+                <img src="logo.png" alt="logoGear" style="float:left;width:60px;height:60px;">
+				<h1>VISUALIZATION OF DISASTER DAMAGES</h1>
+			</div>
+		</header>
+        
+        
+        <main>
+            <div id="outer-grid">
+                <div id="inner-grid">
+                    <div id="logo">
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+                        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+                        crossorigin=""/>
+
+                        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+                        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+                        crossorigin=""></script>
+
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+                        <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+                    
+                    
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
+                        <div id="mapid" style = "height: 525px"></div> 
+                        <div id="button">
+                            <button onclick="Leafymap()">Leaflet</button>
+                        </div>  
+                
+                        <script>
+                            function Leafymap(){
+                                var mymap = L.map('mapid').setView([31.6623, -99.0306], 5.55555);
+                                L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+                                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                                maxZoom: 18,
+                                tileSize: 512,
+                                id: 'mapbox/dark-v10',
+                                zoomOffset: -1,
+                                accessToken: 'pk.eyJ1Ijoicm9oYW4tZGViYXlhbiIsImEiOiJja25uc2FzczAxMWRzMm5wODhrYXJ2NTljIn0.dLasZHAVft79uWvvLM8b3g'
+                                }).addTo(mymap);
+                                
+                                filt = Run('s');
+                                
+                                //console.log("insidehtml",filt[1]["Latitude"])
+                                for (var i = 0; i < filt.length; i++) {
+                                    ans=[];
+                                    //var Lat = parseFloat(filt[i]["Latitude"])
+                                    //var Long = parseFloat(filt[i]["Longitude"])
+                                    ans.push(filt[i]['Latitude'],filt[i]['Longitude'])
+                                    marker = new L.marker(ans)
+                                    .bindPopup('<h1>'+filt[i]["County"]+'</h1><p>Hazard: '+filt[i]["Hazard_type"]+'</p><p>Crop_Damage: '+filt[i]["Crop_Damage"]+'</p><p>Property_Damage: '+filt[i]["Property_Damage"]+'</p><p>State: '+filt[i]["State"]+'</p>')
+                                    .addTo(mymap);
+                                }
+                            }
+                        </script>
+                        
+                    </div>
+
+                    <div id="logo">
+                        <div id="button">
+                        <button onclick="drawChart()">Chart</button></div> 
+                
+                        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                        <script type="text/javascript">
+                        google.charts.load('current', {'packages':['bar']});
+                        //google.charts.setOnLoadCallback(drawChart);
+                        function drawChart() {
+                        var data = google.visualization.arrayToDataTable(Run('g'));
+
+                        var options = {
+                        chart: {
+                            title: 'Disaster Damages',                    
+                        },
+                        bars: 'horizontal' // Required for Material Bar Charts.
+                        };
+
+                        var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+
+                        chart.draw(data, google.charts.Bar.convertOptions(options));
+                        } //"width: 900px; height: 500px;"
+                        </script>
+                        <div id="barchart_material" style="width: 100%; height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </main> 
+                        
+        <nav id="nav">
+            <div class="innertube">
+                <body bgcolor="474747">
+                <!--Border around parameter area-->
+                <table border="1" align="center" width="365px" cellpadding="5px" bgcolor="white"><td>
+                <h1 id = "h">Disaster Damage Mapping</h1>
+            </div>    
+        
+            <div>
+                <h2 id = "h">Map Attributes Selection</h2>
+                
+                <p>Please select Damage types:</p>
+                <input type="radio" id="PropertyDmg" name="qdmg1" value="PropertyDmg">
+                <label for="PropertyDmg">Property Damage</label><br>
+                <input type="radio" id="CropDmg" name="qdmg2" value="CropDmg">
+                <label for="CropDmg">Crop Damage</label><br>
+                
+
+                <p>Please select Hazard type:</p>
+                <input type="radio" id="haz1" name="qhaz1" value="Coastal">
+                <label for="haz1">Coastal</label><br>
+                <input type="radio" id="haz2" name="qhaz2" value="Drought">
+                <label for="haz2">Drought</label><br>
+                <input type="radio" id="haz3" name="qhaz3" value="Flooding">
+                <label for="haz3">Flooding</label><br>
+                <input type="radio" id="haz4" name="qhaz4" value="Fog">
+                <label for="haz4">Fog</label><br>
+                <input type="radio" id="haz5" name="qhaz5" value="Hail">
+                <label for="haz5">Hail</label><br>
+                <input type="radio" id="haz6" name="qhaz6" value="Hurricane/Tropical Storm">
+                <label for="haz6">Hurricane/Tropical Storm</label><br>
+                <input type="radio" id="haz7" name="qhaz7" value="Lightning">
+                <label for="haz7">Lightning</label><br>
+                <input type="radio" id="haz8" name="qhaz8" value="Severe Storm/Thunder Storm">
+                <label for="haz8">Severe Storm/Thunder Storm</label><br>
+                <input type="radio" id="haz9" name="qhaz9" value="Tornado">
+                <label for="haz9">Tornado</label><br>
+                <input type="radio" id="haz10" name="qhaz10" value="Wildfire">
+                <label for="haz10">Wildfire</label><br>
+                <input type="radio" id="haz11" name="qhaz11" value="Wind">
+                <label for="haz11">Wind</label><br>
+                <input type="radio" id="haz12" name="qhaz12" value="Winter Weather">
+                <label for="haz12">Winter Weather</label><br>
+                <br>
+                                
+                <label for="area" align="left">Choose the encompassing area:</label>
+                <br><br>
+                <select name="Area" id="Names">
+                    <option value="Anderson">Anderson</option>
+                    <option value="Andrews">Andrews</option>
+                    <option value="Angelina">Angelina</option>
+                    <option value="Aransas">Aransas</option>
+                    <option value="Archer">Archer</option>
+                    <option value="Armstrong">Armstrong</option>
+                    <option value="Atascosa">Atascosa</option>
+                    <option value="Austin">Austin</option>
+                    <option value="Bailey">Bailey</option>
+                    <option value="Bandera">Bandera</option>
+                    <option value="Bastrop">Bastrop</option>
+                    <option value="Baylor">Baylor</option>
+                    <option value="Bee">Bee</option>
+                    <option value="Bell">Bell</option>
+                    <option value="Bexar">Bexar</option>
+                    <option value="Blanco">Blanco</option>
+                    <option value="Borden">Borden</option>
+                    <option value="Bosque">Bosque</option>
+                    <option value="Bowie">Bowie</option>
+                    <option value="Brazoria">Brazoria</option>
+                    <option value="Brazos">Brazos</option>
+                    <option value="Brewster">Brewster</option>
+                    <option value="Briscoe">Briscoe</option>
+                    <option value="Brooks">Brooks</option>
+                    <option value="Brown">Brown</option>
+                    <option value="Burleson">Burleson</option>
+                    <option value="Burnet">Burnet</option>
+                    <option value="Caldwell">Caldwell</option>
+                    <option value="Calhoun">Calhoun</option>
+                    <option value="Callahan">Callahan</option>
+                    <option value="Cameron">Cameron</option>
+                    <option value="Camp">Camp</option>
+                    <option value="Carson">Carson</option>
+                    <option value="Cass">Cass</option>
+                    <option value="Castro">Castro</option>
+                    <option value="Chambers">Chambers</option>
+                    <option value="Cherokee">Cherokee</option>
+                    <option value="Childress">Childress</option>
+                    <option value="Clay">Clay</option>
+                    <option value="Cochran">Cochran</option>
+                    <option value="Coke">Coke</option>
+                    <option value="Coleman">Coleman</option>
+                    <option value="Collin">Collin</option>
+                    <option value="Collingsworth">Collingsworth</option>
+                    <option value="Colorado">Colorado</option>
+                    <option value="Comal">Comal</option>
+                    <option value="Comanche">Comanche</option>
+                    <option value="Concho">Concho</option>
+                    <option value="Cooke">Cooke</option>
+                    <option value="Coryell">Coryell</option>
+                    <option value="Cottle">Cottle</option>
+                    <option value="Crane">Crane</option>
+                    <option value="Crockett">Crockett</option>
+                    <option value="Crosby">Crosby</option>
+                    <option value="Culberson">Culberson</option>
+                    <option value="Dallam">Dallam</option>
+                    <option value="Dallas">Dallas</option>
+                    <option value="Dawson">Dawson</option>
+                    <option value="Deaf Smith">Deaf Smith</option>
+                    <option value="Delta">Delta</option>
+                    <option value="Denton">Denton</option>
+                    <option value="DeWitt">DeWitt</option>
+                    <option value="Dickens">Dickens</option>
+                    <option value="Dimmit">Dimmit</option>
+                    <option value="Donley">Donley</option>
+                    <option value="Duval">Duval</option>
+                    <option value="Eastland">Eastland</option>
+                    <option value="Ector">Ector</option>
+                    <option value="Edwards">Edwards</option>
+                    <option value="Ellis">Ellis</option>
+                    <option value="El Paso">El Paso</option>
+                    <option value="Erath">Erath</option>
+                    <option value="Falls">Falls</option>
+                    <option value="Fannin">Fannin</option>
+                    <option value="Fayette">Fayette</option>
+                    <option value="Fisher">Fisher</option>
+                    <option value="Floyd">Floyd</option>
+                    <option value="Foard">Foard</option>
+                    <option value="Fort Bend">Fort Bend</option>
+                    <option value="Franklin">Franklin</option>
+                    <option value="Freestone">Freestone</option>
+                    <option value="Frio">Frio</option>
+                    <option value="Gaines">Gaines</option>
+                    <option value="Galveston">Galveston</option>
+                    <option value="Garza">Garza</option>
+                    <option value="Gillespie">Gillespie</option>
+                    <option value="Glasscock">Glasscock</option>
+                    <option value="Goliad">Goliad</option>
+                    <option value="Gonzales">Gonzales</option>
+                    <option value="Gray">Gray</option>
+                    <option value="Grayson">Grayson</option>
+                    <option value="Gregg">Gregg</option>
+                    <option value="Grimes">Grimes</option>
+                    <option value="Guadalupe">Guadalupe</option>
+                    <option value="Hale">Hale</option>
+                    <option value="Hall">Hall</option>
+                    <option value="Hamilton">Hamilton</option>
+                    <option value="Hansford">Hansford</option>
+                    <option value="Hardeman">Hardeman</option>
+                    <option value="Hardin">Hardin</option>
+                    <option value="Harris">Harris</option>
+                    <option value="Harrison">Harrison</option>
+                    <option value="Hartley">Hartley</option>
+                    <option value="Haskell">Haskell</option>
+                    <option value="Hays">Hays</option>
+                    <option value="Hemphill">Hemphill</option>
+                    <option value="Henderson">Henderson</option>
+                    <option value="Hidalgo">Hidalgo</option>
+                    <option value="Hill">Hill</option>
+                    <option value="Hockley">Hockley</option>
+                    <option value="Hood">Hood</option>
+                    <option value="Hopkins">Hopkins</option>
+                    <option value="Houston">Houston</option>
+                    <option value="Howard">Howard</option>
+                    <option value="Hudspeth">Hudspeth</option>
+                    <option value="Hunt">Hunt</option>
+                    <option value="Hutchinson">Hutchinson</option>
+                    <option value="Irion">Irion</option>
+                    <option value="Jack">Jack</option>
+                    <option value="Jackson">Jackson</option>
+                    <option value="Jasper">Jasper</option>
+                    <option value="Jeff Davis">Jeff Davis</option>
+                    <option value="Jefferson">Jefferson</option>
+                    <option value="Jim Hogg">Jim Hogg</option>
+                    <option value="Jim Wells">Jim Wells</option>
+                    <option value="Johnson">Johnson</option>
+                    <option value="Jones">Jones</option>
+                    <option value="Karnes">Karnes</option>
+                    <option value="Kaufman">Kaufman</option>
+                    <option value="Kendall">Kendall</option>
+                    <option value="Kenedy">Kenedy</option>
+                    <option value="Kent">Kent</option>
+                    <option value="Kerr">Kerr</option>
+                    <option value="Kimble">Kimble</option>
+                    <option value="King">King</option>
+                    <option value="Kinney">Kinney</option>
+                    <option value="Kleberg">Kleberg</option>
+                    <option value="Knox">Knox</option>
+                    <option value="Lamar">Lamar</option>
+                    <option value="Lamb">Lamb</option>
+                    <option value="Lampasas">Lampasas</option>
+                    <option value="La Salle">La Salle</option>
+                    <option value="Lavaca">Lavaca</option>
+                    <option value="Lee">Lee</option>
+                    <option value="Leon">Leon</option>
+                    <option value="Liberty">Liberty</option>
+                    <option value="Limestone">Limestone</option>
+                    <option value="Lipscomb">Lipscomb</option>
+                    <option value="Live Oak">Live Oak</option>
+                    <option value="Llano">Llano</option>
+                    <option value="Loving">Loving</option>
+                    <option value="Lubbock">Lubbock</option>
+                    <option value="Lynn">Lynn</option>
+                    <option value="McCulloch">McCulloch</option>
+                    <option value="McLennan">McLennan</option>
+                    <option value="McMullen">McMullen</option>
+                    <option value="Madison">Madison</option>
+                    <option value="Marion">Marion</option>
+                    <option value="Martin">Martin</option>
+                    <option value="Mason">Mason</option>
+                    <option value="Matagorda">Matagorda</option>
+                    <option value="Maverick">Maverick</option>
+                    <option value="Medina">Medina</option>
+                    <option value="Menard">Menard</option>
+                    <option value="Midland">Midland</option>
+                    <option value="Milam">Milam</option>
+                    <option value="Mills">Mills</option>
+                    <option value="Mitchell">Mitchell</option>
+                    <option value="Montague">Montague</option>
+                    <option value="Montgomery">Montgomery</option>
+                    <option value="Moore">Moore</option>
+                    <option value="Morris">Morris</option>
+                    <option value="Motley">Motley</option>
+                    <option value="Nacogdoches">Nacogdoches</option>
+                    <option value="Navarro">Navarro</option>
+                    <option value="Newton">Newton</option>
+                    <option value="Nolan">Nolan</option>
+                    <option value="Nueces">Nueces</option>
+                    <option value="Ochiltree">Ochiltree</option>
+                    <option value="Oldham">Oldham</option>
+                    <option value="Orange">Orange</option>
+                    <option value="Palo Pinto">Palo Pinto</option>
+                    <option value="Panola">Panola</option>
+                    <option value="Parker">Parker</option>
+                    <option value="Parmer">Parmer</option>
+                    <option value="Pecos">Pecos</option>
+                    <option value="Polk">Polk</option>
+                    <option value="Potter">Potter</option>
+                    <option value="Presidio">Presidio</option>
+                    <option value="Rains">Rains</option>
+                    <option value="Randall">Randall</option>
+                    <option value="Reagan">Reagan</option>
+                    <option value="Real">Real</option>
+                    <option value="Red River">Red River</option>
+                    <option value="Reeves">Reeves</option>
+                    <option value="Refugio">Refugio</option>
+                    <option value="Roberts">Roberts</option>
+                    <option value="Robertson">Robertson</option>
+                    <option value="Rockwall">Rockwall</option>
+                    <option value="Runnels">Runnels</option>
+                    <option value="Rusk">Rusk</option>
+                    <option value="Sabine">Sabine</option>
+                    <option value="San Augustine">San Augustine</option>
+                    <option value="San Jacinto">San Jacinto</option>
+                    <option value="San Patricio">San Patricio</option>
+                    <option value="San Saba">San Saba</option>
+                    <option value="Schleicher">Schleicher</option>
+                    <option value="Scurry">Scurry</option>
+                    <option value="Shackelford">Shackelford</option>
+                    <option value="Shelby">Shelby</option>
+                    <option value="Sherman">Sherman</option>
+                    <option value="Smith">Smith</option>
+                    <option value="Somervell">Somervell</option>
+                    <option value="Starr">Starr</option>
+                    <option value="Stephens">Stephens</option>
+                    <option value="Sterling">Sterling</option>
+                    <option value="Stonewall">Stonewall</option>
+                    <option value="Sutton">Sutton</option>
+                    <option value="Swisher">Swisher</option>
+                    <option value="Tarrant">Tarrant</option>
+                    <option value="Taylor">Taylor</option>
+                    <option value="Terrell">Terrell</option>
+                    <option value="Terry">Terry</option>
+                    <option value="Throckmorton">Throckmorton</option>
+                    <option value="Titus">Titus</option>
+                    <option value="Tom Green">Tom Green</option>
+                    <option value="Travis">Travis</option>
+                    <option value="Trinity">Trinity</option>
+                    <option value="Tyler">Tyler</option>
+                    <option value="Upshur">Upshur</option>
+                    <option value="Upton">Upton</option>
+                    <option value="Uvalde">Uvalde</option>
+                    <option value="Val Verde">Val Verde</option>
+                    <option value="Van Zandt">Van Zandt</option>
+                    <option value="Victoria">Victoria</option>
+                    <option value="Walker">Walker</option>
+                    <option value="Waller">Waller</option>
+                    <option value="Ward">Ward</option>
+                    <option value="Washington">Washington</option>
+                    <option value="Webb">Webb</option>
+                    <option value="Wharton">Wharton</option>
+                    <option value="Wheeler">Wheeler</option>
+                    <option value="Wichita">Wichita</option>
+                    <option value="Wilbarger">Wilbarger</option>
+                    <option value="Willacy">Willacy</option>
+                    <option value="Williamson">Williamson</option>
+                    <option value="Wilson">Wilson</option>
+                    <option value="Winkler">Winkler</option>
+                    <option value="Wise">Wise</option>
+                    <option value="Wood">Wood</option>
+                    <option value="Yoakum">Yoakum</option>
+                    <option value="Young">Young</option>
+                    <option value="Zapata">Zapata</option>
+                    <option value="Zavala">Zavala</option>                    
+                    <option value="TX">Texas</option>
+                </select>
+                <br>
+                <br>
+
+                <div id="button">
+                <button onclick="Run()" >Submit</button>
+                </div>
+            </div>            
+            </table>
+    
+        </nav>
+
+        <footer id="footer">
+                <div id="outer-grid">
+                    <div id="inner-grid">
+                        <div id="logo">
+                            <h2 id="h">Most Frequent Disaster Type: </h2>
+                            <h3 id="print"></h3>
+                            <div id="button">
+                                <button onclick="Freqprin()">Most Frequent</button>   
+                            </div>
+                            <img id="imag" src="logo.png", width="100", height="100"> 
+                            <script type="text/javascript">
+                                function Freqprin(){
+                                freq=Run('f');
+                                document.getElementById("print").innerHTML = freq;
+                                var freqi = freq.replace("/", "_");
+                                document.getElementById("imag").src = freqi+'.jpg';
+                                }
+                            </script>    
+                        </div>
+
+                        <div id="logo">
+                            <h2 id="h">Most Damaging Disaster: </h2>
+                            <h3 id="print1"></h3>
+                            <div id="button">
+                                <button onclick="DamaDis()">Most Damaging</button>   
+                            </div>
+                            <img id="imag1" src="logo.png", width="100", height="100">
+                            <script type="text/javascript">
+                            function DamaDis(){
+                                mdmg=Run('d');
+                                document.getElementById("print1").innerHTML = mdmg;
+                                var mdmgi = mdmg.replace("/", "_");
+                                document.getElementById("imag1").src = mdmgi+'.jpg';
+                            }
+                            </script>
+                        </div> 
+                    </div>
+                </div>
+        </footer>
+
+    </body>
+</html
